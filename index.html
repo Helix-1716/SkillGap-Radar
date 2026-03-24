@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillGapRadar - Premium Welcome</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // MANDATORY EXPERIENCE-FIRST REDIRECT
+      // This script forces a redirect to the Welcome Portal on every page reload (F5 / Hard Refresh).
+      // window variables do not persist across reloads, so this will always catch fresh entries and refreshes.
+      if (!window.__RADAR_UNLOCKED__ && window.location.pathname !== '/') {
+        window.location.href = '/';
+      }
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
