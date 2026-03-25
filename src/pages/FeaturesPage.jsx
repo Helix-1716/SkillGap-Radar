@@ -26,17 +26,19 @@ const FeaturesPage = () => {
     <AppBackground>
       <Navbar />
       <div className="max-w-7xl mx-auto px-6 pt-40 pb-32">
-        <div className="text-center mb-24">
+        <div className="text-center mb-24 relative">
           <motion.div 
              initial={{ opacity: 0, scale: 0.8 }}
              animate={{ opacity: 1, scale: 1 }}
-             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6"
+             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-8 shadow-[0_0_30px_rgba(16,185,129,0.1)]"
           >
-            Capabilities
+            [ Capability Matrix ]
           </motion.div>
-          <h1 className="text-6xl font-black mb-6">Designed for Excellence</h1>
-          <p className="text-white/40 text-xl max-w-2xl mx-auto leading-relaxed">
-            SkillGap Radar uses state-of-the-art vector mapping to provide a laboratory-precise analysis of your professional profile.
+          <h1 className="text-7xl font-black mb-8 italic tracking-tighter bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            Designed for Excellence
+          </h1>
+          <p className="text-white/40 text-xl max-w-2xl mx-auto leading-relaxed font-medium">
+            SkillGap Radar employs high-fidelity vector matching to provide a laboratory-precise analysis of your professional trajectory.
           </p>
         </div>
 
@@ -62,7 +64,7 @@ const FeaturesPage = () => {
             { 
               title: 'Roadmap Generation', 
               icon: Search, 
-              color: 'text-blue-400',
+              color: 'text-primary',
               desc: 'Custom 4-week learning paths generated specifically to eliminate your most critical skill gaps.' 
             },
             { 
@@ -96,14 +98,17 @@ const FeaturesPage = () => {
           ))}
         </motion.div>
 
-        <div className="mt-24 p-12 glass-morphism rounded-[3rem] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div>
-            <h2 className="text-3xl font-black mb-3 italic">Ready to see it in action?</h2>
-            <p className="text-white/40 font-medium">Join 450,000+ students already perfecting their profiles.</p>
+        <div className="mt-40 p-16 glass-morphism rounded-[3.5rem] border border-white/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 blur-[120px] pointer-events-none" />
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12 relative">
+            <div className="max-w-xl">
+              <h2 className="text-5xl font-black mb-4 italic tracking-tight">Ready to initiate analysis?</h2>
+              <p className="text-white/40 text-lg font-medium leading-relaxed">Join the next generation of professionals perfecting their professional trajectory.</p>
+            </div>
+            <GlowButton size="lg" className="px-14 py-8 text-lg" onClick={() => window.location.href = '/analyze'}>
+              Initialize Radar <Zap className="w-5 h-5 ml-3" />
+            </GlowButton>
           </div>
-          <GlowButton size="lg" className="px-12" onClick={() => window.location.href = '/analyze'}>
-            Try Analyze Now
-          </GlowButton>
         </div>
       </div>
     </AppBackground>

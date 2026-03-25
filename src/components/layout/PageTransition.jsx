@@ -97,7 +97,7 @@ const PageTransition = ({ children }) => {
            to { transform: rotate(360deg); }
         }
         .bg-noise {
-           background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+           background-image: url("/noise.svg");
         }
       `}</style>
     </div>

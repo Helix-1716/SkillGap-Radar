@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { 
@@ -19,44 +19,118 @@ import {
   Lock,
   Globe,
   MoreVertical,
-  Briefcase
+  Briefcase,
+  Loader2,
+  Save
 } from 'lucide-react';
 import AppBackground from '../components/layout/AppBackground';
 import Navbar from "../components/layout/Navbar";
 import GlassCard from '../components/ui/GlassCard';
 import GlowButton from '../components/ui/GlowButton';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, profile, logout, getProfileImage, loading } = useAuth();
+  const { user, profile, logout, getProfileImage, loading, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('expertise');
+  const [skills, setSkills] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [profileStats, setProfileStats] = useState({
+    analyses: 0, verifiedSkills: 0, certifications: 0, successRate: '0%'
+  });
+  const [dataLoading, setDataLoading] = useState(true);
 
   if (!loading && !user) {
     return <Navigate to="/login" replace />;
   }
 
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchProfileData = async () => {
+      setDataLoading(true);
+
+      // Fetch user skills
+      const { data: skillsData } = await supabase
+        .from("user_skills")
+        .select("*")
+        .eq("user_id", user.uid)
+        .order("score", { ascending: false });
+
+      if (skillsData) {
+        setSkills(skillsData.map(s => ({
+          name: s.name,
+          level: getSkillLevel(s.score),
+          score: s.score
+        })));
+      }
+
+      // Fetch user documents
+      const { data: docsData } = await supabase
+        .from("user_documents")
+        .select("*")
+        .eq("user_id", user.uid)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (docsData) {
+        setDocuments(docsData.map(d => ({
+          id: d.id,
+          name: d.name,
+          date: new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit' }),
+          size: formatFileSize(d.size_bytes)
+        })));
+      }
+
+      // Fetch analyses for stats
+      const { data: analysesData } = await supabase
+        .from("analyses")
+        .select("score")
+        .eq("user_id", user.uid);
+
+      if (analysesData) {
+        const total = analysesData.length;
+        const successCount = analysesData.filter(a => a.score >= 70).length;
+        const successRate = total > 0 ? Math.round((successCount / total) * 100) : 0;
+        setProfileStats({
+          analyses: total,
+          verifiedSkills: skillsData?.length || 0,
+          certifications: 0,
+          successRate: `${successRate}%`
+        });
+      }
+
+      setDataLoading(false);
+    };
+
+    fetchProfileData();
+  }, [user]);
+
+  const getSkillLevel = (score) => {
+    if (score >= 90) return 'Master';
+    if (score >= 75) return 'Expert';
+    if (score >= 60) return 'Senior';
+    if (score >= 40) return 'Advanced';
+    return 'Beginner';
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return '0 B';
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
+      localStorage.removeItem('__RADAR_UNLOCKED__');
       navigate('/');
     } catch (err) {
       console.error(err);
     }
   };
-
-  const skills = [
-    { name: 'React Architecture', level: 'Master', score: 95 },
-    { name: 'Node.js Systems', level: 'Expert', score: 82 },
-    { name: 'Cloud Infrastructure', level: 'Senior', score: 74 },
-    { name: 'Vector Databases', level: 'Advanced', score: 68 },
-  ];
-
-  const documents = [
-    { name: 'standard_resume_2026.pdf', date: 'Mar 20', size: '2.4 MB' },
-    { name: 'portfolio_archive.zip', date: 'Jan 12', size: '45.8 MB' },
-    { name: 'cert_google_clp.pdf', date: 'Dec 03', size: '1.1 MB' },
-  ];
 
   if (loading) {
     return (
@@ -78,25 +152,25 @@ const ProfilePage = () => {
             <GlassCard className="p-8 text-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-primary/10 via-secondary/10 to-transparent pointer-events-none" />
               
-              <div className="relative mb-6 inline-block group">
-                <div className="w-32 h-32 rounded-[2.5rem] bg-white/5 border border-white/10 p-2 overflow-hidden shadow-2xl transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3">
+              <div className="relative mb-8 inline-block group">
+                <div className="w-32 h-32 rounded-[2.5rem] bg-white/5 border border-white/10 p-2 overflow-hidden shadow-2xl transition-all duration-700 group-hover:border-primary/50 relative">
                   <img 
                     src={getProfileImage()} 
                     alt="User" 
                     className="w-full h-full object-cover rounded-[2rem]" 
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                     <Edit2 className="w-6 h-6 text-white" />
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-primary border-4 border-[#030303] flex items-center justify-center text-white shadow-xl">
-                   <Shield className="w-5 h-5" />
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-primary border-4 border-obsidian flex items-center justify-center text-black shadow-xl">
+                   <Shield className="w-5 h-5 fill-current" />
                 </div>
               </div>
 
               <h2 className="text-2xl font-black mb-1 italic">{profile?.displayName}</h2>
               <p className="text-primary text-[10px] font-black uppercase tracking-widest mb-6 px-4 py-1.5 rounded-full bg-primary/10 inline-block border border-primary/20">
-                Senior Radar Elite
+                {profile?.title || 'Radar User'}
               </p>
 
               <div className="flex justify-center gap-4 mb-8">
@@ -118,11 +192,11 @@ const ProfilePage = () => {
                 </div>
                 <div className="flex items-center gap-3 text-white/40 group cursor-pointer hover:text-white transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:text-primary"><Briefcase className="w-4 h-4" /></div>
-                  <span className="text-xs font-semibold">Technical Architect</span>
+                  <span className="text-xs font-semibold">{profile?.title || 'Set your title'}</span>
                 </div>
                 <div className="flex items-center gap-3 text-white/40 group cursor-pointer hover:text-white transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:text-primary"><Globe className="w-4 h-4" /></div>
-                  <span className="text-xs font-semibold">Bay Area, CA</span>
+                  <span className="text-xs font-semibold">{profile?.location || 'Set your location'}</span>
                 </div>
               </div>
 
@@ -134,21 +208,7 @@ const ProfilePage = () => {
               </button>
             </GlassCard>
 
-            <GlassCard className="p-6 bg-primary/5 border-primary/20 relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 blur-[40px] pointer-events-none" />
-               <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-2xl group-hover:rotate-12 transition-transform">
-                     <Award className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="text-lg font-black italic">Rank #04</div>
-                    <div className="text-[10px] font-black uppercase text-primary tracking-widest leading-none">Global Tier</div>
-                  </div>
-               </div>
-               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '88%' }} className="h-full bg-primary" />
-               </div>
-            </GlassCard>
+
           </div>
 
           {/* Main Content Column */}
@@ -157,10 +217,10 @@ const ProfilePage = () => {
             {/* Detailed Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Analyses', val: '43', color: 'text-blue-400' },
-                { label: 'Verified Skills', val: '12', color: 'text-primary' },
-                { label: 'Certifications', val: '5', color: 'text-secondary' },
-                { label: 'Success Rate', val: '92%', color: 'text-emerald-400' },
+                { label: 'Analyses', val: dataLoading ? '...' : String(profileStats.analyses), color: 'text-blue-400' },
+                { label: 'Verified Skills', val: dataLoading ? '...' : String(profileStats.verifiedSkills), color: 'text-primary' },
+                { label: 'Documents', val: dataLoading ? '...' : String(documents.length), color: 'text-secondary' },
+                { label: 'Success Rate', val: dataLoading ? '...' : profileStats.successRate, color: 'text-emerald-400' },
               ].map((stat, i) => (
                 <GlassCard key={i} className="p-6 text-center">
                   <div className={`text-2xl font-black mb-1 ${stat.color}`}>{stat.val}</div>
@@ -171,7 +231,7 @@ const ProfilePage = () => {
 
             {/* Content Tabs */}
             <div className="flex gap-8 border-b border-white/5 px-2">
-              {['expertise', 'assets', 'milestones'].map((tab) => (
+              {['expertise', 'assets'].map((tab) => (
                 <button 
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -192,32 +252,44 @@ const ProfilePage = () => {
               {activeTab === 'expertise' && (
                 <motion.div 
                   key="expertise"
-                  initial={{ opacity: 0, kx: -10 }} 
+                  initial={{ opacity: 0, x: -10 }} 
                   animate={{ opacity: 1, x: 0 }} 
                   exit={{ opacity: 0, x: 10 }}
                   className="space-y-6"
                 >
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {skills.map((skill, i) => (
-                      <GlassCard key={i} className="p-6 group cursor-pointer hover:border-white/20 transition-all">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-bold">{skill.name}</h4>
-                          <span className="text-[10px] font-black uppercase text-primary tracking-widest">{skill.level}</span>
-                        </div>
-                        <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden mb-2">
-                          <motion.div 
-                            initial={{ width: 0 }} 
-                            animate={{ width: `${skill.score}%` }} 
-                            className="h-full bg-gradient-to-r from-primary to-secondary" 
-                          />
-                        </div>
-                        <div className="flex justify-between text-[8px] font-black text-white/20 tracking-widest">
-                           <span>{skill.score}% PROFICIENCY</span>
-                           <span>MASTER TRACK</span>
-                        </div>
-                      </GlassCard>
-                    ))}
-                  </div>
+                  {dataLoading ? (
+                    <div className="flex items-center justify-center py-20">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </div>
+                  ) : skills.length === 0 ? (
+                    <div className="text-center py-20">
+                      <Zap className="w-10 h-10 text-white/10 mx-auto mb-4" />
+                      <p className="text-white/30 text-sm font-medium mb-6">No verified skills yet. Run an analysis to discover your expertise!</p>
+                      <GlowButton onClick={() => navigate('/analyze')} size="sm" variant="primary" className="px-8">
+                        Analyze Now <Sparkles className="w-3 h-3" />
+                      </GlowButton>
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {skills.map((skill, i) => (
+                        <GlassCard key={i} className="p-6 group cursor-pointer hover:border-white/20 transition-all">
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-bold">{skill.name}</h4>
+                          </div>
+                          <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-3">
+                            <motion.div 
+                              initial={{ width: 0 }} 
+                              animate={{ width: `${skill.score}%` }} 
+                              className="h-full bg-primary shadow-[0_0_10px_rgba(16,185,129,0.5)]" 
+                            />
+                          </div>
+                          <div className="flex justify-between text-[8px] font-black text-white/20 tracking-widest">
+                             <span>{skill.score}% PROFICIENCY</span>
+                          </div>
+                        </GlassCard>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -229,27 +301,43 @@ const ProfilePage = () => {
                   exit={{ opacity: 0, x: 10 }}
                   className="space-y-4"
                 >
-                  {documents.map((doc, i) => (
-                    <GlassCard key={i} className="p-5 flex items-center justify-between hover:bg-white/[0.04] transition-all group">
-                       <div className="flex items-center gap-5">
-                          <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:text-primary transition-colors">
-                             <FileText className="w-6 h-6" />
-                          </div>
-                          <div>
-                             <div className="font-bold text-sm mb-1">{doc.name}</div>
-                             <div className="text-[10px] text-white/20 font-black uppercase tracking-widest flex items-center gap-2">
-                                <span>{doc.date}</span>
-                                <span className="w-1 h-1 rounded-full bg-white/10" />
-                                <span>{doc.size}</span>
-                             </div>
-                          </div>
-                       </div>
-                       <button className="p-3 rounded-lg bg-white/5 hover:bg-white/10 text-white/20 hover:text-white transition-all">
-                          <ChevronRight className="w-5 h-5" />
-                       </button>
-                    </GlassCard>
-                  ))}
-                  <GlowButton variant="glass" className="w-full mt-4 py-6 border-dashed border-2 border-white/5 bg-transparent hover:bg-white/5 hover:border-white/10">
+                  {dataLoading ? (
+                    <div className="flex items-center justify-center py-20">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </div>
+                  ) : documents.length === 0 ? (
+                    <div className="text-center py-20">
+                      <FileText className="w-10 h-10 text-white/10 mx-auto mb-4" />
+                      <p className="text-white/30 text-sm font-medium mb-6">No documents uploaded yet. Upload a resume to get started!</p>
+                      <GlowButton onClick={() => navigate('/analyze')} size="sm" variant="primary" className="px-8">
+                        Upload Resume <Sparkles className="w-3 h-3" />
+                      </GlowButton>
+                    </div>
+                  ) : (
+                    <>
+                      {documents.map((doc, i) => (
+                        <GlassCard key={doc.id || i} className="p-5 flex items-center justify-between hover:bg-white/[0.04] transition-all group">
+                           <div className="flex items-center gap-5">
+                              <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:text-primary transition-colors">
+                                 <FileText className="w-6 h-6" />
+                              </div>
+                              <div>
+                                 <div className="font-bold text-sm mb-1">{doc.name}</div>
+                                 <div className="text-[10px] text-white/20 font-black uppercase tracking-widest flex items-center gap-2">
+                                    <span>{doc.date}</span>
+                                    <span className="w-1 h-1 rounded-full bg-white/10" />
+                                    <span>{doc.size}</span>
+                                 </div>
+                              </div>
+                           </div>
+                           <button className="p-3 rounded-lg bg-white/5 hover:bg-white/10 text-white/20 hover:text-white transition-all">
+                              <ChevronRight className="w-5 h-5" />
+                           </button>
+                        </GlassCard>
+                      ))}
+                    </>
+                  )}
+                  <GlowButton onClick={() => navigate('/analyze')} variant="glass" className="w-full mt-4 py-6 border-dashed border-2 border-white/5 bg-transparent hover:bg-white/5 hover:border-white/10">
                      <Sparkles className="w-4 h-4 text-primary" /> Upload New Repository Asset
                   </GlowButton>
                 </motion.div>

@@ -6,9 +6,9 @@ const AppBackground = ({ children, className = "" }) => {
     <div className={`relative min-h-screen w-full bg-[#030303] text-white overflow-hidden ${className}`}>
       {/* Mesh Gradient Base */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#8b5cf6]/10 blur-[120px] rounded-full animate-pulse-slow" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#ec4899]/10 blur-[120px] rounded-full animate-pulse-slow" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#4F46E5]/5 blur-[100px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full animate-pulse-slow font-inter" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-secondary/10 blur-[120px] rounded-full animate-pulse-slow" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-white/5 blur-[100px] rounded-full" />
       </div>
 
       {/* Floating Animated Blobs */}
@@ -23,7 +23,7 @@ const AppBackground = ({ children, className = "" }) => {
             repeat: Infinity,
             ease: "easeInOut"
           }}
-          className="absolute top-[20%] left-[10%] w-96 h-96 bg-[#8b5cf6]/20 blur-[100px] rounded-full"
+          className="absolute top-[20%] left-[10%] w-96 h-96 bg-primary/20 blur-[100px] rounded-full"
         />
         <motion.div
           animate={{
@@ -35,16 +35,24 @@ const AppBackground = ({ children, className = "" }) => {
             repeat: Infinity,
             ease: "easeInOut"
           }}
-          className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-[#ec4899]/20 blur-[100px] rounded-full"
+          className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-secondary/20 blur-[100px] rounded-full"
         />
       </div>
 
-      {/* Grid Overlay */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03]" 
-           style={{ backgroundImage: `radial-gradient(circle, #fff 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
+      {/* Technical Grid Base */}
+      <div className="fixed inset-0 z-0 pointer-events-none tech-grid opacity-[0.05]" />
+      
+      {/* Corner Crosshairs (CAD-style) */}
+      <div className="fixed top-8 left-8 z-0 pointer-events-none opacity-20 text-[8px] font-black text-primary tracking-widest">
+        0.00° LAT / 0.00° LON
+      </div>
+      <div className="fixed bottom-8 right-8 z-0 pointer-events-none opacity-20 text-[8px] font-black text-primary tracking-widest text-right">
+        [ SYS_RADAR_ACTIVE ]<br />
+        MATRIX_RESOLUTION: 1.05
+      </div>
       
       {/* Noise / Grain Texture */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.02] mix-blend-overlay bg-noise" />
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] mix-blend-overlay bg-noise" />
 
       {/* Main Content */}
       <div className="relative z-10">
@@ -53,7 +61,7 @@ const AppBackground = ({ children, className = "" }) => {
       
       <style>{`
         .bg-noise {
-          background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+          background-image: url("/noise.svg");
         }
       `}</style>
     </div>

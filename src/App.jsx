@@ -10,32 +10,39 @@ import ProfilePage from './pages/ProfilePage';
 import DashboardPage from './pages/DashboardPage';
 import SecurityLogsPage from './pages/SecurityLogsPage';
 import { AuthProvider } from './context/AuthContext';
-import { useEffect } from 'react';
 import PageTransition from './components/layout/PageTransition';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
-  useEffect(() => {
-    // If the experience hasn't been unlocked by the Welcome button in the current JS lifecycle,
-    // force every page refresh back to the root WelcomePage.
-    if (!window.__RADAR_UNLOCKED__ && window.location.pathname !== '/') {
-      window.location.href = '/';
-    }
-  }, []);
-
   return (
     <Router>
       <AuthProvider>
         <PageTransition>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<WelcomePage />} />
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/analyze" element={<AnalyzePage />} />
-            <Route path="/features" element={<FeaturesPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/security-logs" element={<SecurityLogsPage />} />
+            <Route path="/features" element={<FeaturesPage />} />
+
+            {/* Application Core (Protected) */}
+            <Route path="/home" element={
+              <ProtectedRoute><HomePage /></ProtectedRoute>
+            } />
+            <Route path="/analyze" element={
+              <ProtectedRoute><AnalyzePage /></ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute><ProfilePage /></ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute><DashboardPage /></ProtectedRoute>
+            } />
+            <Route path="/security-logs" element={
+              <ProtectedRoute><SecurityLogsPage /></ProtectedRoute>
+            } />
+
+            {/* Fallback */}
             <Route path="*" element={<WelcomePage />} />
           </Routes>
         </PageTransition>
