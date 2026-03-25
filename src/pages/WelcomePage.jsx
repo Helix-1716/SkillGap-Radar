@@ -49,9 +49,9 @@ const WelcomePage = () => {
       
       {/* MAIN CONTENT LAYER */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        initial={{ opacity: 0, scale: 0.98, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-10 text-center"
       >
         <div className="flex flex-col items-center justify-center gap-6 mb-16">

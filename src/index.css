@@ -34,9 +34,9 @@ body {
 
 .glass-morphism {
   background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
   border: 0.5px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.4);
 }
 
 .tech-grid {

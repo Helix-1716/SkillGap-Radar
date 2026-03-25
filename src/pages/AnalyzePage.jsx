@@ -335,7 +335,8 @@ const AnalyzePage = () => {
         
         <header className="mb-16">
           <motion.div 
-            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
             className="flex items-center gap-4 mb-4"
           >
             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.2)]">

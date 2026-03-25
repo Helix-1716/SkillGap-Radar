@@ -148,8 +148,9 @@ const DashboardPage = () => {
         
         {/* Profile Summary Strip */}
         <motion.div 
-          initial={{ opacity: 0, y: -5 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
           className="flex flex-col md:flex-row items-center gap-6 mb-12 p-6 glass-morphism rounded-[2.5rem] border border-white/5"
         >
           <div className="w-20 h-20 rounded-[1.5rem] bg-white/5 border border-white/10 overflow-hidden shadow-2xl relative group">

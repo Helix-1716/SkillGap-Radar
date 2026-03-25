@@ -11,32 +11,10 @@ const AppBackground = ({ children, className = "" }) => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-white/2 blur-[100px] rounded-full" />
       </div>
 
-      {/* Floating Animated Blobs */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-20">
-        <motion.div
-          animate={{
-            x: [0, 40, -20, 0],
-            y: [0, -30, 20, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-[20%] left-[10%] w-96 h-96 bg-primary/20 blur-[100px] rounded-full"
-        />
-        <motion.div
-          animate={{
-            x: [0, -50, 30, 0],
-            y: [0, 40, -50, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-secondary/20 blur-[100px] rounded-full"
-        />
+      {/* Static Sub-Glows (Low Cost) */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-10">
+        <div className="absolute top-[20%] left-[10%] w-96 h-96 bg-primary/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-secondary/10 blur-[120px] rounded-full" />
       </div>
 
       {/* Technical Grid Base */}

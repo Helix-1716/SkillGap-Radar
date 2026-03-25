@@ -25,7 +25,7 @@ const GlowButton = ({
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`relative rounded-2xl transition-all duration-500 flex items-center justify-center gap-3 overflow-hidden border ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`relative rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 overflow-hidden border ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {/* Internal "Hardware Light" Gloss */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-white/20" />

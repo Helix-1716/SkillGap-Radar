@@ -28,8 +28,9 @@ const FeaturesPage = () => {
       <div className="max-w-7xl mx-auto px-6 pt-40 pb-32">
         <div className="text-center mb-24 relative">
           <motion.div 
-             initial={{ opacity: 0, scale: 0.8 }}
-             animate={{ opacity: 1, scale: 1 }}
+             initial={{ opacity: 0, y: 5 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.4 }}
              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-8 shadow-[0_0_30px_rgba(16,185,129,0.1)]"
           >
             [ Capability Matrix ]
