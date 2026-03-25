@@ -29,6 +29,20 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
     doc.setGState(new doc.GState({ opacity: 1 }));
   };
 
+// --- HELPER: DRAW WATERMARK ---
+  const drawWatermark = (text = "SKILLGAP RADAR // OFFICIAL REPORT") => {
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.03 }));
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(50);
+    doc.setFont("helvetica", "bold");
+    doc.text(text, pageWidth / 2, pageHeight / 2, {
+      align: "center",
+      angle: 45
+    });
+    doc.restoreGraphicsState();
+  };
+
   // --- 1. HEADER (Branding) ---
   doc.setFillColor(...dark);
   doc.rect(0, 0, pageWidth, 45, 'F');
@@ -44,12 +58,15 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.setTextColor(110, 110, 130);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 5.0.1 // HIGH FIDELITY", 15, 32);
+  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 5.2.0 // WATERMARKED", 15, 32);
   
   doc.setTextColor(180, 180, 180);
   doc.setFontSize(8);
   doc.text(`PILOT: ${userName.toUpperCase()}`, pageWidth - 15, 22, { align: "right" });
   doc.text(`STAMP: ${new Date().toLocaleString()}`, pageWidth - 15, 30, { align: "right" });
+
+  // Add Watermark to first page
+  drawWatermark();
 
   // --- 2. VECTOR SYNC SCORE (Visual) ---
   let yPos = 65;
@@ -149,6 +166,7 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
       
       if (yPos + itemHeight > 275) {
         doc.addPage();
+        drawWatermark(); // Watermark on new page
         yPos = 20;
       }
       
@@ -192,4 +210,3 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   // Save the PDF
   doc.save(`Radar_Trajectory_Report_${analysisResult.jdMeta?.role || 'Unit'}.pdf`);
 };
-
