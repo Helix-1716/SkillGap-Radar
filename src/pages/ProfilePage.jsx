@@ -40,6 +40,14 @@ const ProfilePage = () => {
     analyses: 0, verifiedSkills: 0, certifications: 0, successRate: '0%'
   });
   const [dataLoading, setDataLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editedProfile, setEditedProfile] = useState({
+    displayName: '',
+    title: '',
+    location: '',
+    bio: ''
+  });
 
   if (!loading && !user) {
     return <Navigate to="/login" replace />;
@@ -107,6 +115,17 @@ const ProfilePage = () => {
     fetchProfileData();
   }, [user]);
 
+  useEffect(() => {
+    if (profile) {
+      setEditedProfile({
+        displayName: profile.displayName || '',
+        title: profile.title || '',
+        location: profile.location || '',
+        bio: profile.bio || ''
+      });
+    }
+  }, [profile]);
+
   const getSkillLevel = (score) => {
     if (score >= 90) return 'Master';
     if (score >= 75) return 'Expert';
@@ -120,6 +139,23 @@ const ProfilePage = () => {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    try {
+      const { error } = await updateProfile({
+        display_name: editedProfile.displayName,
+        title: editedProfile.title,
+        location: editedProfile.location,
+        bio: editedProfile.bio
+      });
+      if (!error) setIsEditing(false);
+    } catch (err) {
+      console.error("Profile save error:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -160,17 +196,24 @@ const ProfilePage = () => {
                     className="w-full h-full object-cover rounded-[2rem]" 
                   />
                   <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                    <Edit2 className="w-6 h-6 text-white" />
+                    <Settings className="w-6 h-6 text-white animate-spin-slow" />
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-primary border-4 border-obsidian flex items-center justify-center text-black shadow-xl">
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-primary border-4 border-[#0F172A] flex items-center justify-center text-black shadow-xl">
                    <Shield className="w-5 h-5 fill-current" />
                 </div>
               </div>
 
-              <h2 className="text-2xl font-black mb-1 italic">{profile?.displayName}</h2>
-              <p className="text-primary text-[10px] font-black uppercase tracking-widest mb-6 px-4 py-1.5 rounded-full bg-primary/10 inline-block border border-primary/20">
-                {profile?.title || 'Radar User'}
+              <div className="mb-6">
+                <h2 className="text-2xl font-black mb-1 italic tracking-tight">{profile?.displayName}</h2>
+                <div className="px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 inline-flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                  <span className="text-primary text-[9px] font-black uppercase tracking-widest">{profile?.title || 'Elite Pilot'}</span>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-white/30 font-medium leading-relaxed mb-8 px-4 italic">
+                {profile?.bio || "No technical authorization statement provided."}
               </p>
 
               <div className="flex justify-center gap-4 mb-8">
@@ -231,7 +274,7 @@ const ProfilePage = () => {
 
             {/* Content Tabs */}
             <div className="flex gap-8 border-b border-white/5 px-2">
-              {['expertise', 'assets'].map((tab) => (
+              {['expertise', 'assets', 'matrix settings'].map((tab) => (
                 <button 
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -343,6 +386,87 @@ const ProfilePage = () => {
                   <GlowButton onClick={() => navigate('/analyze')} variant="glass" className="w-full mt-4 py-6 border-dashed border-2 border-white/5 bg-transparent hover:bg-white/5 hover:border-white/10">
                      <Sparkles className="w-4 h-4 text-primary" /> Upload New Repository Asset
                   </GlowButton>
+                </motion.div>
+              )}
+              {activeTab === 'matrix settings' && (
+                <motion.div 
+                  key="settings"
+                  initial={{ opacity: 0, scale: 0.98 }} 
+                  animate={{ opacity: 1, scale: 1 }} 
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  className="space-y-8"
+                >
+                   <GlassCard className="p-12 border-white/10 relative overflow-hidden bg-white/[0.01]">
+                      <div className="flex items-center justify-between mb-12">
+                         <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                               <Settings className="w-6 h-6" />
+                            </div>
+                            <div>
+                               <h3 className="text-xl font-bold italic tracking-tight">Identity Calibration</h3>
+                               <p className="text-[10px] text-white/20 font-black uppercase tracking-widest mt-1">Update primary matrix metadata</p>
+                            </div>
+                         </div>
+                         <GlowButton onClick={handleSaveProfile} disabled={isSaving} variant="primary" size="sm" className="px-8 font-black uppercase text-[10px]">
+                            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sync Changes"}
+                         </GlowButton>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-10">
+                         <div className="space-y-6">
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Callsign / Name</label>
+                               <input 
+                                 type="text"
+                                 value={editedProfile.displayName}
+                                 onChange={(e) => setEditedProfile({...editedProfile, displayName: e.target.value})}
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-primary/50 outline-none transition-all placeholder:text-white/10"
+                                 placeholder="Elite Pilot"
+                               />
+                            </div>
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Professional Designation</label>
+                               <input 
+                                 type="text"
+                                 value={editedProfile.title}
+                                 onChange={(e) => setEditedProfile({...editedProfile, title: e.target.value})}
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-primary/50 outline-none transition-all placeholder:text-white/10"
+                                 placeholder="Software Architect"
+                               />
+                            </div>
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Geo-Location Vector</label>
+                               <input 
+                                 type="text"
+                                 value={editedProfile.location}
+                                 onChange={(e) => setEditedProfile({...editedProfile, location: e.target.value})}
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-primary/50 outline-none transition-all placeholder:text-white/10"
+                                 placeholder="San Francisco, CA"
+                               />
+                            </div>
+                         </div>
+                         <div className="space-y-6">
+                            <div className="space-y-2 h-full flex flex-col">
+                               <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Authorization Bio</label>
+                               <textarea 
+                                 value={editedProfile.bio}
+                                 onChange={(e) => setEditedProfile({...editedProfile, bio: e.target.value})}
+                                 className="w-full h-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm focus:border-primary/50 outline-none transition-all placeholder:text-white/10 resize-none min-h-[200px]"
+                                 placeholder="Brief technical summary..."
+                               />
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="mt-12 p-6 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <Shield className="w-5 h-5 text-primary/40" />
+                            <p className="text-[9px] font-black uppercase tracking-widest text-primary/40 leading-relaxed max-w-lg">
+                               Primary identity attributes are used for AI vector matching and PDF authorization. Unauthorized modifications are logged to the security vault.
+                            </p>
+                         </div>
+                      </div>
+                   </GlassCard>
                 </motion.div>
               )}
             </AnimatePresence>

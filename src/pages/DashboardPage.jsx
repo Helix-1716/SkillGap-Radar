@@ -30,6 +30,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const { user, profile, logout, getProfileImage, loading } = useAuth();
   const [history, setHistory] = useState([]);
+  const [skills, setSkills] = useState([]);
   const [stats, setStats] = useState({ total: 0, avgScore: 0, roadmaps: 0, readiness: 'N/A' });
   const [topGap, setTopGap] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
@@ -71,47 +72,85 @@ const DashboardPage = () => {
         .select("*")
         .eq("user_id", user.uid)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(20);
 
-      if (!error && analyses) {
-        const formattedHistory = analyses.map(a => ({
-          id: a.id,
-          role: a.role_title || 'Untitled',
-          company: a.company || '',
-          score: `${a.score}%`,
-          date: formatRelativeDate(a.created_at),
-          status: a.status || 'completed'
-        }));
-        
-        setHistory(formattedHistory);
+      if (!error) {
+        // MIGRATION LOGIC: If DB is empty but cache has data, push cache to DB
+        const cached = JSON.parse(localStorage.getItem('skillgap_local_history') || '[]');
+        if (analyses.length === 0 && cached.length > 0) {
+           console.log("Migrating local history to matrix vault...");
+           // Take at most 5 latest for migration to avoid bulk errors
+           const toMigrate = cached.slice(0, 5);
+           for (const item of toMigrate) {
+             await supabase.from("analyses").insert({
+               user_id: user.uid,
+               role_title: item.role_title || item.role || 'Untitled',
+               score: parseInt(item.score) || 0,
+               matched_skills: item.matched_skills || [],
+               missing_skills: item.missing_skills || [],
+               summary: item.summary || '',
+               created_at: item.created_at || new Date().toISOString(),
+               status: 'completed'
+             });
+           }
+           // Re-fetch now that we migrated
+           const { data: refreshed } = await supabase
+             .from("analyses")
+             .select("*")
+             .eq("user_id", user.uid)
+             .order("created_at", { ascending: false });
+           
+           if (refreshed) {
+             updateDashboardWithData(refreshed);
+             return;
+           }
+        }
 
-        // SYNC: Update LocalStorage with fresh Supabase data
-        try {
-          localStorage.setItem('skillgap_local_history', JSON.stringify(analyses));
-        } catch (e) { console.warn("Cache sync failed", e); }
-
-        // Compute stats
-        const total = analyses.length;
-        const avgScore = total > 0 ? Math.round(analyses.reduce((s, a) => s + a.score, 0) / total) : 0;
-        const readiness = avgScore > 80 ? 'High' : avgScore > 50 ? 'Medium' : total === 0 ? 'N/A' : 'Low';
-        
-        // Count unique roadmap-worthy analyses
-        const roadmaps = analyses.filter(a => a.missing_skills && a.missing_skills.length > 0).length;
-
-        setStats({ total, avgScore: `${avgScore}%`, roadmaps, readiness });
-
-        // Find top gap from most recent analysis
-        if (analyses.length > 0 && analyses[0].missing_skills?.length > 0) {
-          const mostRecent = analyses[0];
-          setTopGap({
-            skill: mostRecent.missing_skills[0],
-            score: mostRecent.score,
-            context: `Focus on ${mostRecent.missing_skills.slice(0, 2).join(" and ")} to bridge the gap for your latest target role.`
-          });
+        if (analyses.length > 0) {
+           updateDashboardWithData(analyses);
+        } else if (cached.length === 0) {
+           // Both empty
+           setStats({ total: 0, avgScore: '0%', roadmaps: 0, readiness: 'N/A' });
+           setHistory([]);
         }
       }
 
       setDataLoading(false);
+    };
+
+    const updateDashboardWithData = (data) => {
+      const formattedHistory = data.map(a => ({
+        id: a.id,
+        role: a.role_title || 'Untitled',
+        company: a.company || '',
+        score: `${a.score}%`,
+        date: formatRelativeDate(a.created_at),
+        status: a.status || 'completed'
+      }));
+      
+      setHistory(formattedHistory);
+
+      // SYNC: Update LocalStorage with fresh Supabase data
+      try {
+        localStorage.setItem('skillgap_local_history', JSON.stringify(data));
+      } catch (e) { console.warn("Cache sync failed", e); }
+
+      // Compute stats
+      const total = data.length;
+      const avgScore = total > 0 ? Math.round(data.reduce((s, a) => s + (Number(a.score) || 0), 0) / total) : 0;
+      const readiness = avgScore > 80 ? 'High' : avgScore > 50 ? 'Medium' : total === 0 ? 'N/A' : 'Low';
+      const roadmaps = data.filter(a => a.missing_skills && a.missing_skills.length > 0).length;
+
+      setStats({ total, avgScore: `${avgScore}%`, roadmaps, readiness });
+
+      if (data.length > 0 && data[0].missing_skills?.length > 0) {
+        const mostRecent = data[0];
+        setTopGap({
+          skill: mostRecent.missing_skills[0],
+          score: mostRecent.score,
+          context: `Focus on ${mostRecent.missing_skills.slice(0, 2).join(" and ")} to bridge the gap for your latest target role.`
+        });
+      }
     };
 
     fetchDashboardData();
@@ -257,6 +296,41 @@ const DashboardPage = () => {
                 ))}
               </div>
             )}
+          </GlassCard>
+
+          {/* Skills Matrix (from user_skills table) */}
+          <GlassCard className="p-8 relative overflow-hidden h-full">
+            <h3 className="text-xl font-bold mb-8 flex items-center gap-3 italic">
+              <TrendingUp className="w-5 h-5 text-emerald-400" />
+              Technical Matrix
+            </h3>
+            {skills.length === 0 ? (
+              <div className="py-12 text-center">
+                 <p className="text-[10px] text-white/20 font-black uppercase tracking-widest">No skill vectors verified yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                 {skills.map((skill, i) => (
+                   <div key={i} className="space-y-2">
+                      <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                         <span className="text-white/60">{skill.name}</span>
+                         <span className="text-primary">{skill.score}%</span>
+                      </div>
+                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                         <motion.div 
+                           initial={{ width: 0 }} 
+                           animate={{ width: `${skill.score}%` }} 
+                           transition={{ duration: 0.8, delay: i * 0.1 }}
+                           className="h-full bg-primary/40 shadow-[0_0_8px_rgba(16,185,129,0.3)]" 
+                         />
+                      </div>
+                   </div>
+                 ))}
+              </div>
+            )}
+            <div className="mt-10 p-4 rounded-2xl bg-white/2 border border-white/5 italic text-[9px] text-white/30 leading-relaxed">
+               Syncing technical vectors from past {stats.total} analyses for precise market readiness mapping.
+            </div>
           </GlassCard>
 
           {/* Quick Actions / Roadmap */}
