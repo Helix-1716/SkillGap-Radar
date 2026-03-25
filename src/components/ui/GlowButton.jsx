@@ -9,10 +9,10 @@ const GlowButton = ({
   size = "md" 
 }) => {
   const variants = {
-    primary: "bg-primary text-black border-transparent hover:brightness-110 shadow-[0_0_20px_rgba(16,185,129,0.2)]",
-    secondary: "bg-secondary text-white border-transparent hover:brightness-110 shadow-[0_0_20px_rgba(99,102,241,0.2)]",
-    glass: "glass-morphism text-white/90 hover:text-white border-white/10 hover:border-primary/40",
-    outline: "bg-transparent border-white/10 text-white/60 hover:text-white hover:bg-white/5",
+    primary: "bg-primary/90 text-black border-transparent hover:bg-primary hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]",
+    secondary: "bg-secondary/90 text-white border-transparent hover:bg-secondary hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]",
+    glass: "bg-white/5 text-white/80 hover:text-white border-white/5 hover:border-white/20 hover:bg-white/10",
+    outline: "bg-transparent border-white/10 text-white/50 hover:text-white hover:border-white/30 hover:bg-white/5",
   };
 
   const sizes = {
@@ -23,7 +23,6 @@ const GlowButton = ({
 
   return (
     <motion.button
-      whileHover={{ scale: 1.02, y: -1 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={`relative rounded-2xl transition-all duration-500 flex items-center justify-center gap-3 overflow-hidden border ${variants[variant]} ${sizes[size]} ${className}`}

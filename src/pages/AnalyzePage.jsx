@@ -32,6 +32,7 @@ import GlowButton from '../components/ui/GlowButton';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { analyzeWithAI } from '../lib/aiService';
+import { exportRoadmapToPDF } from '../utils/pdfExport';
 
 // Robust worker configuration for PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -46,6 +47,7 @@ const AnalyzePage = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [status, setStatus] = useState('idle'); // idle, processing, success, error
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -292,6 +294,19 @@ const AnalyzePage = () => {
     setShowRoadmap(false);
   };
 
+  const handleExportPDF = async () => {
+    if (!analysisResult || !generatedRoadmap) return;
+    setIsExporting(true);
+    try {
+      await exportRoadmapToPDF(analysisResult, generatedRoadmap, profile?.displayName || user?.email || "Elite Pilot");
+    } catch (err) {
+      console.error("Export Error:", err);
+      setErrorMsg("Failed to generate PDF report.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <AppBackground>
       <Navbar />
@@ -442,11 +457,10 @@ const AnalyzePage = () => {
         {/* ANALYSIS RESULTS SECTION */}
         <AnimatePresence>
           {analysisResult && (
-            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="space-y-20 mb-32">
-               <div className="flex items-center gap-8">
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10" />
-                  <h2 className="text-5xl font-black italic tracking-tightest px-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/30">MATCH ANALYSIS</h2>
-                  <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10" />
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-16 mb-32">
+               <div className="flex items-center gap-6">
+                  <h2 className="text-4xl font-black italic tracking-tight text-white/90">MATCH ANALYSIS</h2>
+                  <div className="h-[1px] flex-1 bg-white/10" />
                </div>
 
                 <div className="grid lg:grid-cols-4 gap-8">
@@ -498,7 +512,7 @@ const AnalyzePage = () => {
                      <GlowButton 
                         onClick={() => setShowRoadmap(true)} 
                         variant="secondary" 
-                        className="w-full h-16 uppercase font-black tracking-[0.2em] text-[11px]"
+                        className="w-full h-14 uppercase font-black tracking-widest text-[10px]"
                      >
                         Generate Optimization Roadmap
                      </GlowButton>
