@@ -41,7 +41,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 const AnalyzePage = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeText, setResumeText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
