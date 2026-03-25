@@ -52,6 +52,7 @@ const AnalyzePage = () => {
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [dragActive, setDragActive] = useState(false);
+  const [portfolioUrl, setPortfolioUrl] = useState("");
   
   const fileInputRef = useRef(null);
 
@@ -117,8 +118,8 @@ const AnalyzePage = () => {
     setErrorMsg("");
     
     try {
-      // Use Client-Side AI Service (Groq)
-      const data = await analyzeWithAI(resumeText, jobDescription);
+      // Use Client-Side AI Service (Groq) with Portfolio Audit
+      const data = await analyzeWithAI(resumeText, jobDescription, portfolioUrl);
 
       const roadmapPhases = [
         {
@@ -142,6 +143,8 @@ const AnalyzePage = () => {
         jdCharCount: jobDescription.length,
         summary: data.insight || "Analysis completed.",
         atsFeedback: data.matchScore > 80 ? "Document structure verified for enterprise Tier-1 ATS filters." : "Warning: Keyword density is insufficient for modern automated screening.",
+        portfolioFeedback: data.portfolioAuditFeedback || "Manual implementation review recommended for deeper verification.",
+        marketInsights: data.marketSyncInsights || "Standard market vectors detected.",
         backendPhases: roadmapPhases,
         dynamicImpact: data.readinessScore ? data.readinessScore - data.matchScore : 15,
         jdMeta: {
@@ -352,7 +355,7 @@ const AnalyzePage = () => {
           </div>
         </header>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid lg:grid-cols-3 gap-8 mb-12">
           {/* Section 1: Resume Upload */}
           <div className="space-y-4">
             <h3 className="text-xl font-bold flex items-center gap-3">
@@ -441,6 +444,38 @@ const AnalyzePage = () => {
                     {jobDescription.length} Units
                   </div>
                </div>
+            </GlassCard>
+          </div>
+          
+          {/* Section 3: Portfolio Audit (New) */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold flex items-center gap-3">
+               <Globe className="w-5 h-5 text-emerald-400" />
+               3. Portfolio Audit (Optional)
+            </h3>
+            <GlassCard className="p-8 border-white/10 min-h-[340px] flex flex-col justify-center gap-6">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">Connect Digital Assets</p>
+                  <p className="text-sm text-white/50 leading-relaxed italic">Provide a GitHub or Portfolio URL for a technical vector deep-dive.</p>
+                </div>
+                
+                <div className="relative">
+                  <input 
+                    type="text"
+                    value={portfolioUrl}
+                    onChange={(e) => setPortfolioUrl(e.target.value)}
+                    placeholder="https://github.com/yourname"
+                    className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-primary/50 transition-all font-mono text-xs text-primary/80"
+                  />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary/20 animate-pulse" />
+                </div>
+
+                <div className="p-5 rounded-2xl bg-primary/5 border border-primary/10 flex items-center gap-4">
+                  <ShieldCheck className="w-5 h-5 text-primary/40" />
+                  <p className="text-[9px] font-black uppercase tracking-widest text-primary/40 leading-relaxed">
+                    Automated security Scan & Logic Consistency Check Enroute
+                  </p>
+                </div>
             </GlassCard>
           </div>
         </div>
@@ -541,9 +576,35 @@ const AnalyzePage = () => {
                   </GlassCard>
 
                   <GlassCard className="p-14 border-white/5 relative bg-black/20 overflow-hidden">
+                     <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/5 blur-[100px]" />
+                     <h3 className="text-3xl font-black mb-8 flex items-center gap-5 italic tracking-tight">
+                        <Globe className="w-10 h-10 text-primary" />
+                        Portfolio & Market Sync
+                     </h3>
+                     <div className="grid md:grid-cols-2 gap-8">
+                        <div className="p-8 rounded-[2.5rem] bg-black/40 border border-white/5 space-y-4">
+                           <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+                              <ShieldCheck className="w-4 h-4" /> Portfolio Audit
+                           </div>
+                           <p className="text-[14px] font-medium leading-[2] text-white/60 italic">
+                              "{analysisResult.portfolioFeedback}"
+                           </p>
+                        </div>
+                        <div className="p-8 rounded-[2.5rem] bg-black/40 border border-white/5 space-y-4">
+                           <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2">
+                              <Zap className="w-4 h-4" /> Market Sync Insights
+                           </div>
+                           <p className="text-[14px] font-medium leading-[2] text-white/60 italic">
+                              "{analysisResult.marketInsights}"
+                           </p>
+                        </div>
+                     </div>
+                  </GlassCard>
+
+                  <GlassCard className="p-14 border-white/5 relative bg-black/20 overflow-hidden">
                      <div className="absolute -top-20 -right-20 w-60 h-60 bg-emerald-500/5 blur-[100px]" />
                      <h3 className="text-3xl font-black mb-8 flex items-center gap-5 italic tracking-tight">
-                        <ShieldCheck className="w-10 h-10 text-emerald-500" />
+                        <BarChart3 className="w-10 h-10 text-emerald-500" />
                         ATS Vector Health
                      </h3>
                      <div className="p-10 rounded-[2.5rem] bg-black/40 border border-white/5 text-[14px] font-medium leading-[2.5] text-white/40 italic relative">
