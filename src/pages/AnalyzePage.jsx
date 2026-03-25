@@ -22,7 +22,8 @@ import {
   RefreshCw,
   AlertTriangle,
   Lightbulb,
-  ArrowRight
+  ArrowRight,
+  Globe
 } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
 import AppBackground from '../components/layout/AppBackground';
