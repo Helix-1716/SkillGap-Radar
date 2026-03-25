@@ -121,7 +121,7 @@ const DashboardPage = () => {
         
         {/* Profile Summary Strip */}
         <motion.div 
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col md:flex-row items-center gap-6 mb-12 p-6 glass-morphism rounded-[2.5rem] border border-white/5"
         >
@@ -131,14 +131,14 @@ const DashboardPage = () => {
           </div>
           <div className="flex-1 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
-               <h2 className="text-2xl font-black italic">{profile?.displayName}</h2>
+               <h2 className="text-2xl font-black italic text-white/90">{profile?.displayName}</h2>
                {stats.readiness === 'High' && (
                  <div className="px-2 py-0.5 rounded-md bg-primary/20 text-primary text-[8px] font-black uppercase tracking-widest border border-primary/20 flex items-center gap-1">
                    <Star className="w-2 h-2 fill-current" /> TOP 1%
                  </div>
                )}
             </div>
-            <p className="text-white/30 text-xs font-semibold flex items-center justify-center md:justify-start gap-2">
+            <p className="text-white/50 text-xs font-semibold flex items-center justify-center md:justify-start gap-2">
                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Radar Active • {stats.total} Analyses Completed
             </p>
           </div>
@@ -196,9 +196,9 @@ const DashboardPage = () => {
               <div className="space-y-4">
                 {history.map((item, idx) => (
                   <motion.div 
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
                     key={item.id || idx} 
                     className="group flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/20 hover:bg-white/[0.04] transition-all cursor-pointer"
                   >
