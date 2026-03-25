@@ -547,20 +547,20 @@ const AnalyzePage = () => {
                  className="absolute inset-0 bg-black/80 backdrop-blur-3xl"
                />
                <motion.div 
-                 initial={{ opacity: 0, scale: 0.95, y: 30 }} 
+                 initial={{ opacity: 0, scale: 0.98, y: 10 }} 
                  animate={{ opacity: 1, scale: 1, y: 0 }} 
-                 exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                 className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden glass-morphism rounded-[3rem] border border-white/10 shadow-[0_0_100px_rgba(139,92,246,0.1)] flex flex-col"
+                 exit={{ opacity: 0, scale: 0.98, y: 10 }}
+                 className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden glass-morphism rounded-[3rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.4)] flex flex-col"
                >
                   {/* Modal Header */}
                   <div className="p-10 border-b border-white/5 flex items-center justify-between bg-black/20">
                      <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(139,92,246,0.2)]">
+                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                            <Map className="w-7 h-7" />
                         </div>
                         <div>
-                           <h2 className="text-3xl font-black italic tracking-tightest">Optimization Roadmap</h2>
-                           <p className="text-[11px] text-white/20 font-black uppercase tracking-[0.3em] mt-1.5 flex items-center gap-3">
+                           <h2 className="text-3xl font-black italic tracking-tight text-white/90">Optimization Roadmap</h2>
+                           <p className="text-[11px] text-white/30 font-black uppercase tracking-[0.3em] mt-1.5 flex items-center gap-3">
                               <Clock className="w-4 h-4" /> Trajectory Calibration for {analysisResult.score}% Sync
                            </p>
                         </div>
@@ -577,8 +577,8 @@ const AnalyzePage = () => {
                   <div className="flex-1 overflow-y-auto p-12 space-y-16 scrollbar-none custom-scroll overflow-x-hidden">
                      
                      {/* Summary Header */}
-                     <div className="bg-white/5 p-10 rounded-[2.5rem] border border-white/5 flex items-center gap-10">
-                        <div className="w-24 h-24 rounded-full border-4 border-primary/20 flex flex-col items-center justify-center bg-black/40 shrink-0">
+                     <div className="bg-white/2 p-10 rounded-[2.5rem] border border-white/5 flex items-center gap-10">
+                        <div className="w-24 h-24 rounded-full border-4 border-primary/10 flex flex-col items-center justify-center bg-black/40 shrink-0">
                            <div className="text-2xl font-black italic text-primary">+{generatedRoadmap.impactEstimate}%</div>
                            <div className="text-[7px] font-black uppercase tracking-widest text-white/20">Sync Boost</div>
                         </div>
@@ -594,37 +594,26 @@ const AnalyzePage = () => {
                                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
                                     {section.icon}
                                  </div>
-                                 <h4 className="text-xl font-black italic tracking-tight">{section.title}</h4>
-                                 <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent" />
+                                 <h4 className="text-xl font-black italic tracking-tight text-white/90">{section.title}</h4>
+                                 <div className="h-[1px] flex-1 bg-white/5" />
                               </div>
 
                               <div className="grid md:grid-cols-2 gap-6">
                                  {section.items.map((item, iIdx) => (
-                                    <GlassCard key={iIdx} className="p-10 border-white/5 hover:border-white/10 transition-all flex flex-col gap-6 relative overflow-hidden group">
-                                       <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                       <div className="space-y-2">
-                                          <div className="text-sm font-black italic tracking-tight text-white mb-2">{item.label}</div>
-                                          <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/20">
-                                             <Lightbulb className="w-4 h-4 text-primary" /> Logic Parameter
-                                          </div>
-                                          <p className="text-[12px] text-white/40 leading-relaxed">{item.why}</p>
+                                    <GlassCard key={iIdx} className="p-8 border-white/5 hover:border-white/10 transition-all flex flex-col gap-5 relative overflow-hidden group">
+                                       <div className="space-y-1">
+                                          <div className="text-sm font-black italic tracking-tight text-white/90 mb-1">{item.label}</div>
+                                          <p className="text-[12px] text-white/50 leading-relaxed">{item.why}</p>
                                        </div>
                                        
-                                       <div className="p-6 rounded-2xl bg-black/40 border border-white/5 space-y-3">
-                                          <div className="text-[10px] font-black uppercase tracking-widest text-secondary flex items-center gap-2">
-                                             <Target className="w-4 h-4" /> Operational Command
-                                          </div>
-                                          <p className="text-[13px] text-white/70 font-medium leading-relaxed">{item.action}</p>
+                                       <div className="p-5 rounded-xl bg-white/2 border border-white/10 space-y-2">
+                                          <p className="text-[13px] text-white/80 font-medium leading-relaxed">{item.action}</p>
                                        </div>
 
-                                       <div className="flex items-center justify-between pt-4 mt-auto">
-                                          <div className="flex items-center gap-3">
-                                             <BarChart3 className="w-4 h-4 text-primary" />
-                                             <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{item.impact}</span>
+                                       <div className="flex items-center justify-between pt-2">
+                                          <div className="flex items-center gap-2.5">
+                                             <span className="text-[9px] font-black uppercase tracking-widest text-primary/50">{item.impact}</span>
                                           </div>
-                                          <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors">
-                                             View Strategy <ArrowRight className="w-3 h-3 text-secondary" />
-                                          </button>
                                        </div>
                                     </GlassCard>
                                  ))}
@@ -634,19 +623,19 @@ const AnalyzePage = () => {
                      </div>
 
                      {/* Competitive Footer Suggestion */}
-                     <GlassCard className="p-12 border-primary/10 bg-gradient-to-br from-primary/5 to-transparent relative group overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-primary/40" />
+                     <GlassCard className="p-12 border-primary/5 bg-white/[0.01] relative group overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-primary/20" />
                         <div className="flex items-center gap-8">
-                           <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary shrink-0 drop-shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                           <div className="w-20 h-20 rounded-3xl bg-primary/5 flex items-center justify-center text-primary/40 shrink-0">
                               <Trophy className="w-10 h-10" />
                            </div>
                            <div className="space-y-2">
-                              <h5 className="text-xl font-black italic tracking-tight">Competitive Trajectory Verification</h5>
+                              <h5 className="text-xl font-black italic tracking-tight text-white/90">Competitive Trajectory Verification</h5>
                               <p className="text-sm text-white/40 font-medium leading-relaxed max-w-xl">
-                                Your current asset synchronization is ranked in the <strong>top 15%</strong> of comparable market vectors. Completing the High Priority phase will elevate you to the 1% bracket for the target role.
+                                Your current asset synchronization is ranked in the <strong>top 15%</strong> of comparable market vectors. Completing the High Priority phase will elevate you to the 1% bracket.
                               </p>
                            </div>
-                           <GlowButton onClick={() => setShowRoadmap(false)} variant="glass" className="ml-auto px-10 h-14">Close Radar Roadmap</GlowButton>
+                           <GlowButton onClick={() => setShowRoadmap(false)} variant="glass" className="ml-auto px-10 h-14 border-white/10">Close Radar Roadmap</GlowButton>
                         </div>
                      </GlassCard>
                   </div>
@@ -654,15 +643,23 @@ const AnalyzePage = () => {
                   {/* Modal Footer Controls */}
                   <div className="p-8 border-t border-white/5 bg-black/40 flex items-center justify-between">
                      <div className="flex items-center gap-8">
-                        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.4em] text-white/10">
-                           <ShieldCheck className="w-4 h-4 text-emerald-500/30" /> Layer 7 Encryption Active
+                        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.4em] text-white/5">
+                           <ShieldCheck className="w-4 h-4 text-emerald-500/10" /> Layer 7 Encryption Active
                         </div>
-                        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.4em] text-white/10">
-                           <Brain className="w-4 h-4 text-secondary/30" /> Radar-X AI Generation Complete
+                        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.4em] text-white/5">
+                           <Brain className="w-4 h-4 text-secondary/10" /> Radar-X AI Generation Complete
                         </div>
                      </div>
                      <div className="flex items-center gap-4">
-                        <GlowButton variant="glass" size="sm" className="px-6 border-white/5 opacity-50">Export PDF Map</GlowButton>
+                        <GlowButton 
+                          onClick={handleExportPDF}
+                          disabled={isExporting}
+                          variant="glass" 
+                          size="sm" 
+                          className="px-6 border-white/10"
+                        >
+                           {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Export PDF Map"}
+                        </GlowButton>
                         <GlowButton onClick={() => setShowRoadmap(false)} size="sm" className="px-10">Close Matrix</GlowButton>
                      </div>
                   </div>
