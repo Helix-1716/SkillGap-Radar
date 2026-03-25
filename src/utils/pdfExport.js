@@ -32,13 +32,14 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
 // --- HELPER: DRAW WATERMARK ---
   const drawWatermark = (text = "SKILLGAP RADAR // OFFICIAL REPORT") => {
     doc.saveGraphicsState();
-    doc.setGState(new doc.GState({ opacity: 0.05 }));
-    doc.setTextColor(150, 150, 150);
-    doc.setFontSize(40);
+    doc.setGState(new doc.GState({ opacity: 0.04 }));
+    doc.setTextColor(180, 180, 180);
+    doc.setFontSize(42);
     doc.setFont("helvetica", "bold");
-    // Center it better by accounting for rotation
+    // Center it precisely using middle baseline and center alignment
     doc.text(text, pageWidth / 2, pageHeight / 2, {
       align: "center",
+      baseline: "middle",
       angle: 45
     });
     doc.restoreGraphicsState();
@@ -59,15 +60,14 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.setTextColor(110, 110, 130);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 5.2.1 // WATERMARKED", 15, 32);
+  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 5.2.2 // WATERMARKED", 15, 32);
   
   doc.setTextColor(200, 200, 200);
   doc.setFontSize(8);
   doc.text(`PILOT: ${userName.toUpperCase()}`, pageWidth - 55, 22, { align: "right" });
   doc.text(`STAMP: ${new Date().toLocaleString()}`, pageWidth - 55, 30, { align: "right" });
 
-  // Add Watermark to first page
-  drawWatermark();
+  // (Removed redundant drawWatermark call here, handled in global loop)
 
   // --- 2. VECTOR SYNC SCORE (Visual) ---
   let yPos = 65;
