@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 /**
  * Generates a high-fidelity "Obsidian Lab" branded PDF optimization report.
@@ -15,11 +15,10 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   const white = [255, 255, 255];
   
   // 1. HEADER (Branding)
-  // Background accent for header
+  // ... (Header logic)
   doc.setFillColor(...dark);
   doc.rect(0, 0, pageWidth, 40, 'F');
   
-  // Logo Text
   doc.setTextColor(...mint);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
@@ -30,7 +29,6 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.setFont("helvetica", "normal");
   doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 4.2.0", 15, 28);
   
-  // Right side header info
   doc.setTextColor(150, 150, 150);
   doc.text(`PILOT: ${userName.toUpperCase()}`, pageWidth - 15, 20, { align: "right" });
   doc.text(`DATE: ${new Date().toLocaleDateString()}`, pageWidth - 15, 28, { align: "right" });
@@ -38,7 +36,6 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   // 2. SCORE & SUMMARY
   let yPos = 55;
   
-  // Match Score Circle (Simulation)
   doc.setDrawColor(...mint);
   doc.setLineWidth(1);
   doc.circle(35, yPos + 10, 15, 'D');
@@ -48,7 +45,6 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.setFontSize(8);
   doc.text("SYNC SCORE", 35, yPos - 2, { align: "center" });
   
-  // AI Insight Box
   doc.setFillColor(245, 245, 245);
   doc.roundedRect(60, yPos - 10, pageWidth - 75, 40, 3, 3, 'F');
   doc.setTextColor(50, 50, 50);
@@ -73,7 +69,7 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
     ["CRITICAL GAPS", analysisResult.missing.join(", ") || "No gaps detected"]
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos + 5,
     head: [["Node Type", "Identified Parameters"]],
     body: skillsData,
