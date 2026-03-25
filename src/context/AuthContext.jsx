@@ -121,6 +121,8 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
+      // Ensure profile exists before logging (fixes race condition 23503)
+      await upsertProfile(result.user);
       // Log login event
       await logSecurityEvent(result.user.uid, "Login via Google", "User authenticated with Google OAuth");
       await logSession(result.user.uid);
@@ -136,6 +138,8 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const result = await signInWithPopup(auth, githubProvider);
+      // Ensure profile exists before logging (fixes race condition 23503)
+      await upsertProfile(result.user);
       // Log login event
       await logSecurityEvent(result.user.uid, "Login via GitHub", "User authenticated with GitHub OAuth");
       await logSession(result.user.uid);
