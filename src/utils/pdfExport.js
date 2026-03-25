@@ -7,139 +7,189 @@ import autoTable from 'jspdf-autotable';
 export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = "Elite Pilot") => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   
   // Colors (Obsidian Lab Palette)
   const mint = [16, 185, 129];      // #10B981
   const indigo = [99, 102, 241];    // #6366F1
   const dark = [15, 23, 42];        // #0F172A
+  const slate = [51, 65, 85];       // #334155
   const white = [255, 255, 255];
   
-  // 1. HEADER (Branding)
-  // ... (Header logic)
+  // --- HELPER: DRAW RADAR OVERLAY ---
+  const drawRadarOverlay = (cx, cy, radius, opacity = 0.05) => {
+    doc.setDrawColor(mint[0], mint[1], mint[2]);
+    doc.setGState(new doc.GState({ opacity }));
+    for (let r = 5; r <= radius; r += 10) {
+      doc.circle(cx, cy, r, 'D');
+    }
+    // Crosshairs
+    doc.line(cx - radius, cy, cx + radius, cy);
+    doc.line(cx, cy - radius, cx, cy + radius);
+    doc.setGState(new doc.GState({ opacity: 1 }));
+  };
+
+  // --- 1. HEADER (Branding) ---
   doc.setFillColor(...dark);
-  doc.rect(0, 0, pageWidth, 40, 'F');
+  doc.rect(0, 0, pageWidth, 45, 'F');
   
+  // Decorative Radar in Header
+  drawRadarOverlay(pageWidth - 40, 22, 15, 0.1);
+
   doc.setTextColor(...mint);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.text("SKILLGAP RADAR", 15, 20);
+  doc.setFontSize(24);
+  doc.text("SKILLGAP RADAR", 15, 22);
   
-  doc.setTextColor(100, 100, 100);
-  doc.setFontSize(8);
+  doc.setTextColor(110, 110, 130);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 4.2.0", 15, 28);
+  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 5.0.1 // HIGH FIDELITY", 15, 32);
   
-  doc.setTextColor(150, 150, 150);
-  doc.text(`PILOT: ${userName.toUpperCase()}`, pageWidth - 15, 20, { align: "right" });
-  doc.text(`DATE: ${new Date().toLocaleDateString()}`, pageWidth - 15, 28, { align: "right" });
-
-  // 2. SCORE & SUMMARY
-  let yPos = 55;
-  
-  doc.setDrawColor(...mint);
-  doc.setLineWidth(1);
-  doc.circle(35, yPos + 10, 15, 'D');
-  doc.setFontSize(18);
-  doc.setTextColor(...mint);
-  doc.text(`${analysisResult.score}%`, 35, yPos + 12, { align: "center" });
+  doc.setTextColor(180, 180, 180);
   doc.setFontSize(8);
+  doc.text(`PILOT: ${userName.toUpperCase()}`, pageWidth - 15, 22, { align: "right" });
+  doc.text(`STAMP: ${new Date().toLocaleString()}`, pageWidth - 15, 30, { align: "right" });
+
+  // --- 2. VECTOR SYNC SCORE (Visual) ---
+  let yPos = 65;
+  
+  // Branding Circle
+  doc.setDrawColor(...mint);
+  doc.setLineWidth(1.5);
+  doc.circle(35, yPos + 15, 18, 'D');
+  doc.setFontSize(22);
+  doc.setTextColor(...mint);
+  doc.text(`${analysisResult.score}%`, 35, yPos + 18, { align: "center" });
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
   doc.text("SYNC SCORE", 35, yPos - 2, { align: "center" });
   
-  doc.setFillColor(245, 245, 245);
-  doc.roundedRect(60, yPos - 10, pageWidth - 75, 40, 3, 3, 'F');
-  doc.setTextColor(50, 50, 50);
+  // Progress Bar for Score
+  doc.setFillColor(240, 240, 240);
+  doc.roundedRect(65, yPos + 22, pageWidth - 80, 4, 2, 2, 'F');
+  doc.setFillColor(...mint);
+  doc.roundedRect(65, yPos + 22, (pageWidth - 80) * (analysisResult.score / 100), 4, 2, 2, 'F');
+
+  // AI Summary Box
+  doc.setFillColor(15, 23, 42, 0.02);
+  doc.roundedRect(65, yPos - 10, pageWidth - 80, 28, 4, 4, 'F');
+  doc.setTextColor(...dark);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text("RADAR AI INSIGHTS", 65, yPos - 2);
+  doc.text("RADAR AI TRAJECTORY INSIGHT", 70, yPos - 2);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(9);
-  const splitInsight = doc.splitTextToSize(analysisResult.summary, pageWidth - 85);
-  doc.text(splitInsight, 65, yPos + 5);
+  doc.setTextColor(80, 80, 90);
+  const splitInsight = doc.splitTextToSize(analysisResult.summary, pageWidth - 95);
+  doc.text(splitInsight, 70, yPos + 6);
 
-  yPos += 50;
+  yPos += 55;
 
-  // 3. SKILLS MATRIX
+  // --- 3. ANALYSIS MATRIX (Tables) ---
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
+  doc.setFontSize(14);
   doc.setTextColor(...dark);
   doc.text("TECHNICAL VECTOR ANALYSIS", 15, yPos);
   
   const skillsData = [
     ["MATCHED VECTORS", analysisResult.matched.join(", ") || "None"],
-    ["CRITICAL GAPS", analysisResult.missing.join(", ") || "No gaps detected"]
+    ["CRITICAL GAPS", analysisResult.missing.join(", ") || "No gaps detected"],
+    ["MARKET SYNC", analysisResult.marketInsights || "Active Synchronization"]
   ];
 
   autoTable(doc, {
-    startY: yPos + 5,
-    head: [["Node Type", "Identified Parameters"]],
+    startY: yPos + 6,
+    head: [["Node Descriptor", "Vector Parameters"]],
     body: skillsData,
     theme: 'grid',
-    headStyles: { fillColor: indigo, textColor: white, fontStyle: 'bold' },
-    styles: { fontSize: 9, cellPadding: 5 },
-    columnStyles: { 0: { fontStyle: 'bold', width: 50 } }
+    headStyles: { fillColor: indigo, textColor: white, fontStyle: 'bold', fontSize: 10 },
+    styles: { fontSize: 9, cellPadding: 6, textColor: 50 },
+    columnStyles: { 0: { fontStyle: 'bold', fillColor: [250, 250, 255], width: 50 } }
   });
 
-  yPos = doc.lastAutoTable.finalY + 20;
+  yPos = doc.lastAutoTable.finalY + 15;
 
-  // 4. OPTIMIZATION ROADMAP
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("OPTIMIZATION ROADMAP", 15, yPos);
-  
-  generatedRoadmap.prioritySections.forEach((section, index) => {
-    yPos += 12;
-    
-    // Section Header
-    doc.setFillColor(index === 0 ? mint[0] : indigo[0], index === 0 ? mint[1] : indigo[1], index === 0 ? mint[2] : indigo[2]);
-    doc.rect(15, yPos - 5, pageWidth - 30, 8, 'F');
-    doc.setTextColor(...white);
+  // --- 4. PORTFOLIO AUDIT (Visual Block) ---
+  if (analysisResult.portfolioFeedback) {
+    doc.setFillColor(...dark);
+    doc.roundedRect(15, yPos, pageWidth - 30, 25, 3, 3, 'F');
+    doc.setTextColor(...mint);
     doc.setFontSize(9);
-    doc.text(section.title.toUpperCase(), 20, yPos);
+    doc.setFont("helvetica", "bold");
+    doc.text("PORTFOLIO AUDIT STATUS: IDENTIFIED", 22, yPos + 10);
+    doc.setTextColor(200, 200, 200);
+    doc.setFont("helvetica", "italic");
+    const portFeedback = doc.splitTextToSize(analysisResult.portfolioFeedback, pageWidth - 45);
+    doc.text(portFeedback, 22, yPos + 17);
+    yPos += 35;
+  }
+
+  // --- 5. OPTIMIZATION ROADMAP (Visual Cards) ---
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(...dark);
+  doc.text("DEPLOYMENT ROADMAP", 15, yPos);
+  
+  yPos += 8;
+
+  generatedRoadmap.prioritySections.forEach((section, index) => {
+    // Section Header with Gradient Look
+    doc.setFillColor(index === 0 ? mint[0] : indigo[0], index === 0 ? mint[1] : indigo[1], index === 0 ? mint[2] : indigo[2]);
+    doc.rect(15, yPos, pageWidth - 30, 10, 'F');
+    doc.setTextColor(...white);
+    doc.setFontSize(10);
+    doc.text(section.title.toUpperCase(), 20, yPos + 7);
     
-    yPos += 10;
+    yPos += 18;
     
-    // Roadmap Items
     section.items.forEach(item => {
-      // Logic for multi-line actions
-      const splitAction = doc.splitTextToSize(item.action, pageWidth - 40);
-      const itemHeight = (splitAction.length * 5) + 15;
+      const splitAction = doc.splitTextToSize(item.action, pageWidth - 45);
+      const itemHeight = (splitAction.length * 5) + 20;
       
-      // Check for page break
-      if (yPos + itemHeight > 270) {
+      if (yPos + itemHeight > 275) {
         doc.addPage();
         yPos = 20;
       }
       
+      // Side indicator line
+      doc.setDrawColor(index === 0 ? mint[0] : indigo[0], index === 0 ? mint[1] : indigo[1], index === 0 ? mint[2] : indigo[2]);
+      doc.setLineWidth(1);
+      doc.line(16, yPos - 5, 16, yPos + itemHeight - 10);
+
       doc.setTextColor(...dark);
       doc.setFont("helvetica", "bold");
-      doc.text(item.label || "Action Item", 20, yPos);
+      doc.setFontSize(10);
+      doc.text(item.label || "Action Protocol", 22, yPos);
       
-      doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`IMPACT: ${item.impact || 'N/A'}`, pageWidth - 20, yPos, { align: "right" });
+      doc.setTextColor(...mint);
+      doc.text(`IMPACT: ${item.impact || 'MAX'}`, pageWidth - 20, yPos, { align: "right" });
       
-      yPos += 5;
-      doc.setTextColor(80, 80, 80);
-      doc.text(splitAction, 20, yPos);
+      yPos += 6;
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(70, 70, 80);
+      doc.text(splitAction, 22, yPos);
       
-      yPos += (splitAction.length * 5) + 8;
-      doc.setDrawColor(230, 230, 230);
-      doc.line(15, yPos - 2, pageWidth - 15, yPos - 2);
-      yPos += 5;
+      yPos += (splitAction.length * 5) + 12;
     });
   });
 
-  // 5. FOOTER
+  // --- 6. FOOTER (Branding) ---
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
+    // Visual Line at bottom
+    doc.setDrawColor(240, 240, 240);
+    doc.line(15, 278, pageWidth - 15, 278);
+
     doc.setFontSize(8);
     doc.setTextColor(180, 180, 180);
-    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 285, { align: "center" });
-    doc.text("CONFIDENTIAL // RADAR-X SECURITY PROTOCOL // SKILLGAP RADAR", 15, 285);
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth - 15, 285, { align: "right" });
+    doc.text("CONFIDENTIAL // RADAR-X SECURITY PROTOCOL // SKILLGAP RADAR SYSTEM", 15, 285);
   }
 
   // Save the PDF
-  doc.save(`Radar_Optimization_Map_${analysisResult.jdMeta?.role || 'Report'}.pdf`);
+  doc.save(`Radar_Trajectory_Report_${analysisResult.jdMeta?.role || 'Unit'}.pdf`);
 };
+
