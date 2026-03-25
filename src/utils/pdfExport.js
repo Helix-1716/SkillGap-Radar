@@ -32,10 +32,11 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
 // --- HELPER: DRAW WATERMARK ---
   const drawWatermark = (text = "SKILLGAP RADAR // OFFICIAL REPORT") => {
     doc.saveGraphicsState();
-    doc.setGState(new doc.GState({ opacity: 0.03 }));
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(50);
+    doc.setGState(new doc.GState({ opacity: 0.05 }));
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(40);
     doc.setFont("helvetica", "bold");
+    // Center it better by accounting for rotation
     doc.text(text, pageWidth / 2, pageHeight / 2, {
       align: "center",
       angle: 45
@@ -47,8 +48,8 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.setFillColor(...dark);
   doc.rect(0, 0, pageWidth, 45, 'F');
   
-  // Decorative Radar in Header
-  drawRadarOverlay(pageWidth - 40, 22, 15, 0.1);
+  // Decorative Radar in Header (Moved further right)
+  drawRadarOverlay(pageWidth - 30, 22, 12, 0.15);
 
   doc.setTextColor(...mint);
   doc.setFont("helvetica", "bold");
@@ -58,12 +59,12 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.setTextColor(110, 110, 130);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 5.2.0 // WATERMARKED", 15, 32);
+  doc.text("OPERATIONAL ANALYSIS MATRIX // PROTOCOL 5.2.1 // WATERMARKED", 15, 32);
   
-  doc.setTextColor(180, 180, 180);
+  doc.setTextColor(200, 200, 200);
   doc.setFontSize(8);
-  doc.text(`PILOT: ${userName.toUpperCase()}`, pageWidth - 15, 22, { align: "right" });
-  doc.text(`STAMP: ${new Date().toLocaleString()}`, pageWidth - 15, 30, { align: "right" });
+  doc.text(`PILOT: ${userName.toUpperCase()}`, pageWidth - 55, 22, { align: "right" });
+  doc.text(`STAMP: ${new Date().toLocaleString()}`, pageWidth - 55, 30, { align: "right" });
 
   // Add Watermark to first page
   drawWatermark();
@@ -80,7 +81,7 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.text(`${analysisResult.score}%`, 35, yPos + 18, { align: "center" });
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  doc.text("SYNC SCORE", 35, yPos - 2, { align: "center" });
+  doc.text("SYNC SCORE", 35, yPos - 5, { align: "center" }); // Moved up
   
   // Progress Bar for Score
   doc.setFillColor(240, 240, 240);
@@ -88,18 +89,18 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
   doc.setFillColor(...mint);
   doc.roundedRect(65, yPos + 22, (pageWidth - 80) * (analysisResult.score / 100), 4, 2, 2, 'F');
 
-  // AI Summary Box
-  doc.setFillColor(15, 23, 42, 0.02);
-  doc.roundedRect(65, yPos - 10, pageWidth - 80, 28, 4, 4, 'F');
-  doc.setTextColor(...dark);
+  // AI Summary Box (Improved Contrast: Dark Box with Light Text)
+  doc.setFillColor(...dark);
+  doc.roundedRect(65, yPos - 12, pageWidth - 80, 32, 4, 4, 'F');
+  doc.setTextColor(...mint);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text("RADAR AI TRAJECTORY INSIGHT", 70, yPos - 2);
+  doc.text("RADAR AI TRAJECTORY INSIGHT", 70, yPos - 4);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(9);
-  doc.setTextColor(80, 80, 90);
+  doc.setTextColor(200, 200, 210);
   const splitInsight = doc.splitTextToSize(analysisResult.summary, pageWidth - 95);
-  doc.text(splitInsight, 70, yPos + 6);
+  doc.text(splitInsight, 70, yPos + 5);
 
   yPos += 55;
 
@@ -193,10 +194,14 @@ export const exportRoadmapToPDF = (analysisResult, generatedRoadmap, userName = 
     });
   });
 
-  // --- 6. FOOTER (Branding) ---
+  // --- 6. GLOBAL FINISH (Footer + Watermark All) ---
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
+    
+    // Watermark (Moved here to ensure it is on EVERY page)
+    drawWatermark();
+
     // Visual Line at bottom
     doc.setDrawColor(240, 240, 240);
     doc.line(15, 278, pageWidth - 15, 278);
