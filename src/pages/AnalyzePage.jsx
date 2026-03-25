@@ -54,8 +54,33 @@ const AnalyzePage = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const [portfolioUrl, setPortfolioUrl] = useState("");
+  const [dailyAnalyses, setDailyAnalyses] = useState(0);
+  const DAILY_LIMIT = 10;
   
   const fileInputRef = useRef(null);
+
+  // Helper: Fetch daily analysis count
+  const fetchUsageCount = useCallback(async () => {
+    if (!user) return;
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const { count, error } = await supabase
+        .from('analyses')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.uid)
+        .gte('created_at', today.toISOString());
+      
+      if (!error) setDailyAnalyses(count || 0);
+    } catch (err) {
+      console.warn("Usage count fetch failed:", err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchUsageCount();
+  }, [fetchUsageCount]);
 
   // Helper: PDF Text Extraction
   const extractTextFromPDF = async (file) => {
@@ -110,11 +135,39 @@ const AnalyzePage = () => {
         mime_type: resumeFile.type || 'application/pdf'
       });
     }
+
+    // --- NEW: Save to 'analyses' table ---
+    try {
+      await supabase.from("analyses").insert({
+        user_id: user.uid,
+        role_title: roleTitle.substring(0, 100),
+        resume_char_count: result.resumeCharCount || 0,
+        jd_char_count: result.jdCharCount || 0,
+        score: result.score || 0,
+        matched_skills: result.matched,
+        missing_skills: result.missing,
+        summary: result.summary,
+        ats_feedback: result.atsFeedback,
+        job_description: jobDescription,
+        status: 'completed'
+      });
+      // Refresh count
+      await fetchUsageCount();
+    } catch (err) {
+      console.error("Critical Analysis Save Error:", err);
+    }
   };
 
   // Main Analysis Logic
   const performAnalysis = async () => {
     if (!resumeText || !jobDescription.trim()) return;
+    
+    // RATE LIMIT CHECK
+    if (dailyAnalyses >= DAILY_LIMIT) {
+      setErrorMsg(`Operational Limit Reached: ${DAILY_LIMIT}/day protocol active. Resets at midnight.`);
+      return;
+    }
+
     setIsAnalyzing(true);
     setErrorMsg("");
     
