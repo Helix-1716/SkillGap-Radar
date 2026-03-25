@@ -155,6 +155,27 @@ const AnalyzePage = () => {
       
       // Save directly to Supabase from frontend
       await saveAnalysis(result);
+
+      // PERSISTENCE: Save to LocalStorage for offline/permanent cache
+      try {
+        const localHistory = JSON.parse(localStorage.getItem('skillgap_local_history') || '[]');
+        const newEntry = {
+          id: Date.now().toString(),
+          role_title: result.jdMeta?.role || jobDescription.trim().split('\n')[0].substring(0, 50) || 'Untitled Role',
+          company: 'Direct Match',
+          score: result.score,
+          created_at: new Date().toISOString(),
+          status: 'completed',
+          matched_skills: result.matched,
+          missing_skills: result.missing,
+          summary: result.summary
+        };
+        // Keep only top 20 in local cache to avoid storage limits
+        const updatedHistory = [newEntry, ...localHistory].slice(0, 20);
+        localStorage.setItem('skillgap_local_history', JSON.stringify(updatedHistory));
+      } catch (e) {
+        console.warn("LocalStorage Persistence Failed:", e);
+      }
       
     } catch (err) {
       console.error("Analysis Error:", err);

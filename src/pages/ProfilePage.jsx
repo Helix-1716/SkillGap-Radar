@@ -252,10 +252,10 @@ const ProfilePage = () => {
               {activeTab === 'expertise' && (
                 <motion.div 
                   key="expertise"
-                  initial={{ opacity: 0, x: -10 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: 10 }}
-                  className="space-y-6"
+                  initial={{ opacity: 0, y: 5 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  exit={{ opacity: 0, y: -5 }}
+                  className="space-y-8"
                 >
                   {dataLoading ? (
                     <div className="flex items-center justify-center py-20">
@@ -270,21 +270,24 @@ const ProfilePage = () => {
                       </GlowButton>
                     </div>
                   ) : (
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-8">
                       {skills.map((skill, i) => (
-                        <GlassCard key={i} className="p-6 group cursor-pointer hover:border-white/20 transition-all">
-                          <div className="flex items-center justify-between mb-4">
-                            <h4 className="font-bold">{skill.name}</h4>
+                        <GlassCard key={i} className="p-8 group cursor-pointer border-white/10 hover:border-primary/30 transition-all duration-300">
+                          <div className="flex items-center justify-between mb-6">
+                            <h4 className="text-lg font-bold tracking-tight text-white/90">{skill.name}</h4>
+                            <div className="text-[9px] font-black uppercase text-primary tracking-widest px-3 py-1 bg-primary/5 rounded-lg border border-primary/10">Verified</div>
                           </div>
-                          <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-3">
+                          <div className="relative h-1 w-full bg-white/5 rounded-full overflow-hidden mb-4">
                             <motion.div 
                               initial={{ width: 0 }} 
                               animate={{ width: `${skill.score}%` }} 
-                              className="h-full bg-primary shadow-[0_0_10px_rgba(16,185,129,0.5)]" 
+                              transition={{ duration: 1.5, ease: "circOut" }}
+                              className="h-full bg-primary shadow-[0_0_15px_rgba(16,185,129,0.3)]" 
                             />
                           </div>
-                          <div className="flex justify-between text-[8px] font-black text-white/20 tracking-widest">
-                             <span>{skill.score}% PROFICIENCY</span>
+                          <div className="flex justify-between text-[7px] font-black text-white/20 tracking-[0.3em]">
+                             <span>{skill.score}% PROFICIENCY MATRIX</span>
+                             <span className="text-white/40">LVL: {skill.level.toUpperCase()}</span>
                           </div>
                         </GlassCard>
                       ))}

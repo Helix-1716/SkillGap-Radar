@@ -43,9 +43,29 @@ const DashboardPage = () => {
     if (!user) return;
     
     const fetchDashboardData = async () => {
+      // PRE-LOAD: Try to get from LocalStorage immediately for zero-latency UI
+      try {
+        const cached = JSON.parse(localStorage.getItem('skillgap_local_history') || '[]');
+        if (cached.length > 0) {
+          setHistory(cached.map(a => ({
+            id: a.id,
+            role: a.role_title || 'Untitled',
+            company: a.company || '',
+            score: `${a.score}%`,
+            date: formatRelativeDate(a.created_at),
+            status: a.status || 'completed'
+          })));
+          
+          // Estimate stats from cache
+          const total = cached.length;
+          const avgScore = total > 0 ? Math.round(cached.reduce((s, a) => s + (Number(a.score) || 0), 0) / total) : 0;
+          setStats(prev => ({ ...prev, total, avgScore: `${avgScore}%` }));
+        }
+      } catch (e) { console.warn("Cache load failed", e); }
+
       setDataLoading(true);
 
-      // Fetch analysis history
+      // Fetch analysis history from Supabase
       const { data: analyses, error } = await supabase
         .from("analyses")
         .select("*")
@@ -54,14 +74,21 @@ const DashboardPage = () => {
         .limit(10);
 
       if (!error && analyses) {
-        setHistory(analyses.map(a => ({
+        const formattedHistory = analyses.map(a => ({
           id: a.id,
           role: a.role_title || 'Untitled',
           company: a.company || '',
           score: `${a.score}%`,
           date: formatRelativeDate(a.created_at),
           status: a.status || 'completed'
-        })));
+        }));
+        
+        setHistory(formattedHistory);
+
+        // SYNC: Update LocalStorage with fresh Supabase data
+        try {
+          localStorage.setItem('skillgap_local_history', JSON.stringify(analyses));
+        } catch (e) { console.warn("Cache sync failed", e); }
 
         // Compute stats
         const total = analyses.length;

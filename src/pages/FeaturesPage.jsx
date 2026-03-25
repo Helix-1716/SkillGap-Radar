@@ -18,7 +18,7 @@ const FeaturesPage = () => {
   };
 
   const item = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 5 },
     show: { opacity: 1, y: 0 }
   };
 
@@ -42,61 +42,62 @@ const FeaturesPage = () => {
           </p>
         </div>
 
-        <motion.div 
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {[
-            { 
-              title: 'Vectorised Skill Extraction', 
-              icon: Zap, 
-              color: 'text-primary',
-              desc: 'Our AI doesn\'t just find keywords; it understands the depth and semantic meaning of your experience.' 
-            },
-            { 
-              title: 'Real-time Market Sync', 
-              icon: Globe, 
-              color: 'text-secondary',
-              desc: 'Direct integration with major job boards ensures your results are matched against current hiring demands.' 
-            },
-            { 
-              title: 'Roadmap Generation', 
-              icon: Search, 
-              color: 'text-primary',
-              desc: 'Custom 4-week learning paths generated specifically to eliminate your most critical skill gaps.' 
-            },
-            { 
-              title: 'Portfolio Audit', 
-              icon: FileText, 
-              color: 'text-green-400',
-              desc: 'Connect your GitHub or Portfolio site for a technical deep-dive into your actual implementation quality.' 
-            },
-            { 
-              title: 'Readiness Scoring', 
-              icon: BarChart3, 
-              color: 'text-yellow-400',
-              desc: 'Transparent scoring across 5 key metrics: Technical, Educational, Industry, Keyword, and soft skills.' 
-            },
-            { 
-              title: 'Enterprise Security', 
-              icon: ShieldCheck, 
-              color: 'text-primary',
-              desc: 'Your data is encrypted and processing happens in secure isolated containers. Your privacy is paramount.' 
-            },
-          ].map((feature, idx) => (
-            <motion.div key={idx} variants={item}>
-              <GlassCard className="h-full group hover:border-white/20 transition-all border-white/5">
-                <div className={`w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform`}>
-                  <feature.icon className={`w-7 h-7 ${feature.color}`} />
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                <p className="text-sm text-white/30 leading-relaxed font-medium">{feature.desc}</p>
-              </GlassCard>
-            </motion.div>
-          ))}
-        </motion.div>
+          {/* Features Grid */}
+          <motion.div 
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {[
+              { 
+                title: 'Vectorised Skill Extraction', 
+                icon: Zap, 
+                color: 'text-primary',
+                desc: 'Our AI doesn\'t just find keywords; it understands the depth and semantic meaning of your experience.' 
+              },
+              { 
+                title: 'Real-time Market Sync', 
+                icon: Globe, 
+                color: 'text-secondary',
+                desc: 'Direct integration with major job boards ensures your results are matched against current hiring demands.' 
+              },
+              { 
+                title: 'Roadmap Generation', 
+                icon: Search, 
+                color: 'text-primary',
+                desc: 'Custom 4-week learning paths generated specifically to eliminate your most critical skill gaps.' 
+              },
+              { 
+                title: 'Portfolio Audit', 
+                icon: FileText, 
+                color: 'text-green-400',
+                desc: 'Connect your GitHub or Portfolio site for a technical deep-dive into your actual implementation quality.' 
+              },
+              { 
+                title: 'Readiness Scoring', 
+                icon: BarChart3, 
+                color: 'text-yellow-400',
+                desc: 'Transparent scoring across 5 key metrics: Technical, Educational, Industry, Keyword, and soft skills.' 
+              },
+              { 
+                title: 'Enterprise Security', 
+                icon: ShieldCheck, 
+                color: 'text-primary',
+                desc: 'Your data is encrypted and processing happens in secure isolated containers. Your privacy is paramount.' 
+              },
+            ].map((feature, idx) => (
+              <motion.div key={idx} variants={item}>
+                <GlassCard className="h-full p-10 group hover:border-white/20 transition-all border-white/10 bg-white/[0.01]">
+                  <div className={`w-16 h-16 rounded-[1.5rem] bg-white/5 flex items-center justify-center mb-10 group-hover:scale-110 transition-all duration-500`}>
+                    <feature.icon className={`w-8 h-8 ${feature.color}`} />
+                  </div>
+                  <h3 className="text-2xl font-black mb-4 italic tracking-tight">{feature.title}</h3>
+                  <p className="text-sm text-white/40 leading-relaxed font-medium">{feature.desc}</p>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </motion.div>
 
         <div className="mt-40 p-16 glass-morphism rounded-[3.5rem] border border-white/5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 blur-[120px] pointer-events-none" />
