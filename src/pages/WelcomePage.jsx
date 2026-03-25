@@ -23,6 +23,14 @@ const WelcomePage = () => {
     }, 1000);
   };
 
+  // Auto-redirect if already logged in and unlocked
+  React.useEffect(() => {
+    const isUnlocked = localStorage.getItem('__RADAR_UNLOCKED__') === 'true';
+    if (isUnlocked && !isExiting) {
+      navigate('/dashboard');
+    }
+  }, [navigate, isExiting]);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#030303] text-white flex flex-col items-center justify-center">
       

@@ -24,7 +24,8 @@ const ProtectedRoute = ({ children, requireUnlock = true }) => {
   }
 
   // 2. Handle "Welcome Gate" check (Persistent via localStorage)
-  const isUnlocked = localStorage.getItem('__RADAR_UNLOCKED__') === 'true';
+  // If the user is authenticated, we assume they've passed the gate
+  const isUnlocked = localStorage.getItem('__RADAR_UNLOCKED__') === 'true' || !!user;
   
   if (requireUnlock && !isUnlocked && location.pathname !== '/') {
     return <Navigate to="/" replace />;
